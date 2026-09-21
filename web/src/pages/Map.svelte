@@ -4459,7 +4459,7 @@
 
 	/* Right-click menu. Wears the officer popup's clothes — same surface, header
 	   and body — so left-click and right-click on the map look like one thing. */
-	.mm-catch { position: fixed; inset: 0; z-index: 1400; }
+	.mm-catch { position: absolute; inset: 0; z-index: 1400; }
 	.mm {
 		position: fixed; z-index: 1401;
 		min-width: 216px;

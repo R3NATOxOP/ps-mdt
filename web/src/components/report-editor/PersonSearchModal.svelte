@@ -109,7 +109,7 @@
 
 <style>
 	.popup-overlay {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
 		right: 0;
@@ -126,8 +126,8 @@
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 6px;
 		width: 90%;
-		max-width: 400px;
-		max-height: 70vh;
+		max-width: min(400px, 90%);
+		max-height: 70%;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;

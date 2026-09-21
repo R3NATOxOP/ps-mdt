@@ -1913,7 +1913,7 @@
 
 	/* ===== Confirm modal ===== */
 	.confirm-backdrop {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.65);
 		backdrop-filter: blur(3px);
@@ -1923,12 +1923,12 @@
 		z-index: 1000;
 	}
 	.confirm-modal {
-		width: min(440px, 92vw);
+		width: min(440px, 92%);
 		background: var(--card-dark-bg, #1a1d23);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
 		overflow: hidden;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 		display: flex;
 		flex-direction: column;
 	}

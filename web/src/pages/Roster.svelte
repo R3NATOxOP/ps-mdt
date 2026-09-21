@@ -1856,7 +1856,7 @@
 
 	/* Certification Modal */
 	.modal-overlay {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
 		width: 100%;
@@ -1872,8 +1872,8 @@
 		background: var(--card-dark-bg);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
-		width: 400px;
-		max-height: 80vh;
+		width: min(400px, 92%);
+		max-height: 80%;
 		display: flex;
 		flex-direction: column;
 		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);

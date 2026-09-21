@@ -296,7 +296,7 @@
 	}
 
 	.modal-overlay {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.6);
 		display: flex;
@@ -310,7 +310,7 @@
 		background: var(--dark-bg);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 8px;
-		width: 360px;
+		width: min(360px, 92%);
 		max-height: 80%;
 		overflow-y: auto;
 		display: flex;

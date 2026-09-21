@@ -1095,11 +1095,11 @@
 	.stash-id { font-size: 11px; font-family: monospace; color: rgba(255, 255, 255, 0.5); background: rgba(255, 255, 255, 0.02); padding: 4px 8px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, 0.04); flex: 1; }
 
 	/* ── Lightbox ── */
-	.lightbox-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200; }
-	.lightbox-content { max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; background: var(--card-dark-bg); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 6px; overflow: hidden; }
+	.lightbox-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200; }
+	.lightbox-content { position: relative; max-width: 90%; max-height: 90%; display: flex; flex-direction: column; background: var(--card-dark-bg); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 6px; overflow: hidden; }
 	.lightbox-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
 	.lightbox-label { font-size: 11px; color: rgba(255, 255, 255, 0.6); font-weight: 500; }
-	.lightbox-image { max-width: 85vw; max-height: 80vh; object-fit: contain; display: block; }
+	.lightbox-image { max-width: 85%; max-height: 80%; object-fit: contain; display: block; }
 
 	/* ── Create Image list ── */
 	.create-image-list { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
@@ -1213,7 +1213,7 @@
 
 	/* ── Modal shared ── */
 	.modal-backdrop {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.7);
 		backdrop-filter: blur(4px);
@@ -1228,8 +1228,9 @@
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 6px;
 		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-		width: 100%;
-		max-width: 700px;
+		width: min(700px, 92%);
+		max-height: 85%;
+		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 	}

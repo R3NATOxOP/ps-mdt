@@ -485,7 +485,7 @@
 
 	/* ── Modal — matches BOLO design ── */
 	.modal-backdrop {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.7);
 		backdrop-filter: blur(4px);
@@ -498,14 +498,14 @@
 		background: var(--card-dark-bg);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 6px;
-		width: min(400px, 92vw);
-		max-height: 85vh;
+		width: min(400px, 92%);
+		max-height: 85%;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 	}
-	.lightbox-modal { width: min(640px, 92vw); }
+	.lightbox-modal { width: min(640px, 92%); }
 
 	.modal-header {
 		display: flex;

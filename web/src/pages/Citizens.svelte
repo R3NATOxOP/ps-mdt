@@ -2187,7 +2187,7 @@
 
 	/* Modal shared */
 	.modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
-	.modal-card { background: var(--dark-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; width: 360px; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; }
+	.modal-card { background: var(--dark-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; width: min(360px, 92%); max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; }
 	.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
 	.modal-header h3 { margin: 0; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
 	.modal-close { background: transparent; border: 1px solid rgba(255,255,255,0.06); border-radius: 3px; color: rgba(255,255,255,0.3); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
@@ -2198,8 +2198,8 @@
 
 	/* ── Shared modals ── */
 	.modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
-	.modal-card { background: var(--dark-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; width: 360px; max-height: 80%; overflow-y: auto; }
-	.modal-card-property { width: 400px; }
+	.modal-card { background: var(--dark-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; width: min(360px, 92%); max-height: 80%; overflow-y: auto; }
+	.modal-card-property { width: min(400px, 92%); }
 	.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
 	.modal-header h3 { margin: 0; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 	.modal-close { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; flex-shrink: 0; }

@@ -882,15 +882,15 @@
     /* No backdrop-filter: CEF paints it as a solid black block rather than blurring, so a
        plain darker scrim is used instead — same as the impound and application forms. */
     .modal-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+        position: absolute; inset: 0; background: rgba(0,0,0,0.6);
         display: flex; align-items: center; justify-content: center; z-index: 100;
     }
     .modal {
         background: var(--card-dark-bg, #1a1c22); border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 6px; width: min(540px, 92vw); max-height: 85vh; overflow: hidden;
+        border-radius: 6px; width: min(540px, 92%); max-height: 85%; overflow: hidden;
         display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
-    .modal-sm { width: min(380px, 92vw); }
+    .modal-sm { width: min(380px, 92%); }
 
     .modal-header {
         display: flex; align-items: center; gap: 10px;

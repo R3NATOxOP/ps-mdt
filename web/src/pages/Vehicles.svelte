@@ -2757,7 +2757,7 @@
 
 	/* ── Modals: same design language as the Add Weapon modal ── */
 	.modal-backdrop {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.7);
 		backdrop-filter: blur(4px);
@@ -2770,14 +2770,14 @@
 		background: var(--card-dark-bg);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 6px;
-		width: min(540px, 92vw);
-		max-height: 85vh;
+		width: min(540px, 92%);
+		max-height: 85%;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 	}
-	.modal-wide { width: min(720px, 94vw); }
+	.modal-wide { width: min(720px, 94%); }
 	.modal-header {
 		display: flex;
 		align-items: center;
@@ -3141,7 +3141,7 @@
 	}
 
 	.imp-lightbox {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.85);
 		display: flex;

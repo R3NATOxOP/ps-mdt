@@ -403,7 +403,7 @@
 	/* Modal shell, matching the Add Weapon dialog. No backdrop-filter: CEF
 	   paints it as a solid black block instead of blurring. */
 	.modal-backdrop {
-		position: fixed;
+		position: absolute;
 		inset: 0;
 		padding: 16px;
 		background: rgba(0, 0, 0, 0.78);
