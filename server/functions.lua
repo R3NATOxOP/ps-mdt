@@ -95,6 +95,37 @@ function IsEmsJob(jobName, jobType)
     return false
 end
 
+--- Check if a job is a DOJ job based on Config.DojJobs and Config.DojJobType
+---@param jobName string|nil
+---@param jobType string|nil
+---@return boolean
+function IsDojJob(jobName, jobType)
+    if jobType and Config and Config.DojJobType and tostring(jobType) == tostring(Config.DojJobType) then
+        return true
+    end
+    if jobName and Config and Config.DojJobs then
+        local check = tostring(jobName)
+        for _, job in ipairs(Config.DojJobs) do
+            if tostring(job) == check then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+--- Check if a player belongs to a DOJ job / role
+---@param src number
+---@return boolean
+function IsCallerDoj(src)
+    if not src or (tonumber(src) or 0) <= 0 then return false end
+    local ok, jobType, jobName = pcall(function()
+        return MDT.getJobType(src), MDT.getJobName(src)
+    end)
+    if not ok then return false end
+    return IsDojJob(jobName, jobType)
+end
+
 --- The MDT "domain" a job belongs to. Police and DOJ share the 'police' domain
 --- (so their calendar / map data stays together); EMS is its own 'ems' domain.
 ---@param jobName string|nil

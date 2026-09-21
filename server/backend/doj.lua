@@ -314,6 +314,9 @@ end)
 lib.callback.register(resourceName .. ':server:reviewWarrantRequest', function(source, request_id, decision, reason)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'warrants_issue')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     request_id = tonumber(request_id)
     if not request_id then return { success = false, error = 'Invalid request id' } end
@@ -329,6 +332,11 @@ lib.callback.register(resourceName .. ':server:reviewWarrantRequest', function(s
 
     local reviewerCitizenid = MDT.getIdentifier(src)
     local reviewerName = getDisplayName(src)
+
+    -- Prevent self-approval / conflict of interest
+    if reviewerCitizenid and (request.requesting_officer == reviewerCitizenid or request.citizenid == reviewerCitizenid) then
+        return { success = false, error = 'You cannot review your own warrant request' }
+    end
 
     -- One warrant per report: if approving and the linked report already has an
     -- active warrant, refuse before mutating anything so we never create a second.
@@ -400,6 +408,9 @@ end)
 lib.callback.register(resourceName .. ':server:scheduleWarrantHearing', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_create')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
     if not CreateWarrantHearingForReport then return { success = false, error = 'Court module unavailable' } end
 
     payload = payload or {}
@@ -584,6 +595,9 @@ end)
 lib.callback.register(resourceName .. ':server:createCourtOrder', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_create')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     payload = payload or {}
     local title = payload.title
@@ -633,6 +647,9 @@ end)
 lib.callback.register(resourceName .. ':server:updateCourtOrder', function(source, orderId, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_edit')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     orderId = tonumber(orderId)
     if not orderId then return { success = false, error = 'Invalid order id' } end
@@ -678,6 +695,9 @@ end)
 lib.callback.register(resourceName .. ':server:revokeCourtOrder', function(source, orderId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_delete')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     orderId = tonumber(orderId)
     if not orderId then return { success = false, error = 'Invalid order id' } end
@@ -763,6 +783,9 @@ end)
 lib.callback.register(resourceName .. ':server:createLegalDocument', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_create')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     payload = payload or {}
     local title = payload.title
@@ -805,6 +828,9 @@ end)
 lib.callback.register(resourceName .. ':server:updateLegalDocument', function(source, docId, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_edit')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     docId = tonumber(docId)
     if not docId then return { success = false, error = 'Invalid document id' } end
@@ -846,6 +872,9 @@ end)
 lib.callback.register(resourceName .. ':server:deleteLegalDocument', function(source, docId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not (IsCallerDoj(src) or CheckPermission(src, 'court_delete')) then
+        return { success = false, error = 'Insufficient permissions - DOJ authority required' }
+    end
 
     docId = tonumber(docId)
     if not docId then return { success = false, error = 'Invalid document id' } end

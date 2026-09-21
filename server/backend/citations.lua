@@ -439,7 +439,24 @@ end)
 
 lib.callback.register(resourceName .. ':server:voidCitation', function(source, citationNumber)
     local src = source
-    if not CheckAuth(src) then return { success = false } end
+    if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+
+    local row = MySQL.single.await(
+        'SELECT id, officer_citizenid, status FROM mdt_citations WHERE citation_number = ?',
+        { citationNumber }
+    )
+    if not row then return { success = false, error = 'Citation not found' } end
+
+    local callerCid = MDT.getIdentifier(src)
+    local isAuthor = callerCid and row.officer_citizenid == callerCid
+    local isBoss = MDT.isBoss and MDT.isBoss(src)
+    local hasChargesEdit = CheckPermission(src, 'charges_edit')
+    local isDoj = (IsCallerDoj and IsCallerDoj(src)) or (MDT.getJobType and MDT.getJobType(src) == 'doj')
+
+    if not (isAuthor or isBoss or hasChargesEdit or isDoj) then
+        return { success = false, error = 'Insufficient permissions to void citation' }
+    end
+
     -- Voiding is deliberately not a delete: the record of a ticket having been
     -- written, and then withdrawn, is the part worth keeping.
     MySQL.update.await(
@@ -875,7 +892,7 @@ lib.callback.register(resourceName .. ':server:getContested', function(source)
     -- An officer sees only the challenges against tickets THEY wrote: those are
     -- the ones they can answer, and a colleague's stop is not theirs to account
     -- for. The court sees all of them, because deciding is its job.
-    local isCourt = MDT.getJobType and MDT.getJobType(source) == 'doj'
+    local isCourt = (IsCallerDoj and IsCallerDoj(source)) or (MDT.getJobType and MDT.getJobType(source) == 'doj') or CheckPermission(source, 'court_edit')
     local mine = (not isCourt) and MDT.getIdentifier(source) or nil
 
     local rows = MySQL.query.await([[
@@ -909,6 +926,12 @@ end)
 lib.callback.register(resourceName .. ':server:citationVerdict', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+
+    local isDoj = (IsCallerDoj and IsCallerDoj(src)) or (MDT.getJobType and MDT.getJobType(src) == 'doj')
+    local hasCourtEdit = CheckPermission(src, 'court_edit')
+    if not (isDoj or hasCourtEdit) then
+        return { success = false, error = 'Insufficient permissions - judicial/court authority required' }
+    end
 
     local number = type(payload) == 'table' and payload.number or nil
     local verdict = type(payload) == 'table' and payload.verdict or nil
