@@ -28,6 +28,9 @@ end
 lib.callback.register(resourceName .. ':server:createCase', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'cases_create') then
+        return { success = false, error = 'Insufficient permissions to create cases' }
+    end
     if not RateLimitAction(src, 'createCase') then
         return { success = false, error = 'You are doing that too fast — wait a moment.' }
     end
@@ -349,6 +352,9 @@ end)
 lib.callback.register(resourceName .. ':server:deleteCase', function(source, caseId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'cases_delete') then
+        return { success = false, error = 'Insufficient permissions to delete cases' }
+    end
 
     caseId = tonumber(caseId)
     if not caseId then
@@ -742,6 +748,9 @@ end)
 lib.callback.register(resourceName .. ':server:deleteEvidenceItem', function(source, evidenceId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'evidence_create') and not (MDT.isBoss and MDT.isBoss(src)) then
+        return { success = false, error = 'Insufficient permissions to delete evidence' }
+    end
 
     evidenceId = tonumber(evidenceId)
     if not evidenceId then

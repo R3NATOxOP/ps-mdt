@@ -295,6 +295,9 @@ end)
 lib.callback.register(resourceName .. ':server:deleteEvidenceItem', function(source, evidenceId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'evidence_create') and not (MDT.isBoss and MDT.isBoss(src)) then
+        return { success = false, error = 'Insufficient permissions to delete evidence' }
+    end
 
     evidenceId = tonumber(evidenceId)
     if not evidenceId then

@@ -623,6 +623,9 @@ end)
 lib.callback.register(resourceName..':server:saveReport', function(source, reportData)
     local src = source
     if not CheckAuth(src) then return end
+    if not CheckPermission(src, 'reports_create') then
+        return { success = false, error = 'Insufficient permissions' }
+    end
     if not RateLimitAction(src, 'createReport') then return end
 
     local identifier = MDT.getIdentifier(src)
@@ -967,6 +970,9 @@ end)
 lib.callback.register(resourceName..':server:deleteReport', function(source, reportId)
     local src = source
     if not CheckAuth(src) then return end
+    if not CheckPermission(src, 'reports_delete') then
+        return { success = false, error = "Insufficient permissions to delete report" }
+    end
 
     reportId = tonumber(reportId)
     if not reportId then

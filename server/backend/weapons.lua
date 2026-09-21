@@ -232,6 +232,9 @@ end)
 lib.callback.register(resourceName .. ':server:saveWeaponInfo', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, message = 'Unauthorized' } end
+    if not CheckPermission(src, 'weapons_add') then
+        return { success = false, message = 'Insufficient permissions to manage weapons' }
+    end
 
     payload = payload or {}
     local serial = payload.serial
@@ -289,6 +292,9 @@ end)
 lib.callback.register(resourceName .. ':server:deleteWeapon', function(source, payload)
     local src = source
     if not CheckAuth(src) then return { success = false, message = 'Unauthorized' } end
+    if not CheckPermission(src, 'weapons_add') and not (MDT.isBoss and MDT.isBoss(src)) then
+        return { success = false, message = 'Insufficient permissions to delete weapons' }
+    end
 
     payload = payload or {}
     local id = tonumber(payload.id)
