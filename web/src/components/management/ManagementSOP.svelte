@@ -3,6 +3,7 @@
 	import { fetchNui } from "../../utils/fetchNui";
 	import { NUI_EVENTS } from "../../constants/nuiEvents";
 	import { createEditorService } from "../../services/editorService.svelte";
+	import { markdownToHtml } from "../../utils/markdown";
 	import type { AuthService } from "../../services/authService.svelte";
 
 	interface SOPSection {
@@ -57,6 +58,8 @@
 	let newSectionTitle = $state("");
 	let editSectionTitle = $state("");
 	let sectionContent = $state("");
+	let markdownMode = $state(false);
+	let markdownContent = $state("");
 
 	// Mission editor
 	let missionEditorEl = $state<HTMLElement | null>(null);
@@ -206,14 +209,40 @@
 		editingSectionId = section.id;
 		editSectionTitle = section.title;
 		sectionContent = section.content;
+		markdownMode = false;
+		markdownContent = "";
+		sectionInitialized = false;
+	}
+
+	function enableMarkdown(service: ReturnType<typeof createEditorService>, content: string) {
+		markdownContent = "";
+		markdownMode = true;
+		service.destroyEditor();
+		sectionInitialized = false;
+		missionInitialized = false;
+		introInitialized = false;
+		if (content && !/<[a-z][\s\S]*>/i.test(content)) {
+			markdownContent = content;
+		}
+	}
+
+	function disableMarkdown(contentTarget: "mission" | "intro" | "section") {
+		const html = markdownToHtml(markdownContent);
+		markdownMode = false;
+		if (contentTarget === "mission") settings.mission_statement = html;
+		if (contentTarget === "intro") settings.introduction = html;
+		if (contentTarget === "section") sectionContent = html;
+		missionInitialized = false;
+		introInitialized = false;
 		sectionInitialized = false;
 	}
 
 	async function saveSection() {
 		if (!editingSectionId) return;
+		const content = markdownMode ? markdownToHtml(markdownContent) : sectionContent;
 		const result = await fetchNui<{ success: boolean }>(
 			NUI_EVENTS.SOP.UPDATE_SOP_SECTION,
-			{ id: editingSectionId, title: editSectionTitle.trim(), content: sectionContent },
+			{ id: editingSectionId, title: editSectionTitle.trim(), content },
 			{ success: true }
 		);
 		if (result?.success) {
@@ -249,7 +278,9 @@
 	// ---- Mission Statement ----
 
 	async function saveMission() {
-		const content = missionEditorService.getContent();
+		const content = markdownMode
+			? markdownToHtml(markdownContent)
+			: missionEditorService.getContent();
 		const result = await fetchNui<{ success: boolean }>(
 			NUI_EVENTS.SOP.UPDATE_SOP_MISSION,
 			{ mission_statement: content },
@@ -264,7 +295,9 @@
 	// ---- Intro ----
 
 	async function saveIntro() {
-		const content = introEditorService.getContent();
+		const content = markdownMode
+			? markdownToHtml(markdownContent)
+			: introEditorService.getContent();
 		const result = await fetchNui<{ success: boolean }>(
 			NUI_EVENTS.SOP.UPDATE_SOP_INTRO,
 			{ introduction: content },
@@ -331,8 +364,24 @@
 		{#if activeTab === "mission"}
 			<div class="intro-tab">
 				<p class="intro-desc">The mission statement is displayed at the top of the SOP page and in the agreement overlay. Define your department's mission, values, and M.O.S. requirements.</p>
-				<div class="editor-container" bind:this={missionEditorEl}></div>
+				{#if markdownMode}
+					<textarea
+						class="markdown-editor"
+						placeholder={"# Mission Statement\n\nWrite Markdown here. Use ![alt text](https://image-url) for images."}
+						bind:value={markdownContent}
+						oninput={() => missionDirty = true}
+					></textarea>
+				{:else}
+					<div class="editor-container" bind:this={missionEditorEl}></div>
+				{/if}
 				<div class="editor-actions">
+					<button
+						class="btn-format"
+						onclick={() => markdownMode ? disableMarkdown("mission") : enableMarkdown(missionEditorService, settings.mission_statement || "")}
+					>
+						<span class="material-icons">code</span>
+						{markdownMode ? "Use Rich Text" : "Use Markdown"}
+					</button>
 					<button class="btn-save" class:dirty={missionDirty} onclick={saveMission}>
 						<span class="material-icons">save</span> Save Mission Statement
 					</button>
@@ -419,8 +468,24 @@
 							<!-- Section Editor -->
 							<div class="section-editor">
 								<input type="text" bind:value={editSectionTitle} placeholder="Section title" class="input-full" />
-								<div class="editor-container" bind:this={sectionEditorEl}></div>
+								{#if markdownMode}
+									<textarea
+										class="markdown-editor"
+										placeholder={"# Section heading\n\nWrite Markdown here. Use ![alt text](https://image-url) for images."}
+										bind:value={markdownContent}
+										oninput={() => sectionDirty = true}
+									></textarea>
+								{:else}
+									<div class="editor-container" bind:this={sectionEditorEl}></div>
+								{/if}
 								<div class="editor-actions">
+									<button
+										class="btn-format"
+										onclick={() => markdownMode ? disableMarkdown("section") : enableMarkdown(sectionEditorService, sectionContent)}
+									>
+										<span class="material-icons">code</span>
+										{markdownMode ? "Use Rich Text" : "Use Markdown"}
+									</button>
 									<button class="btn-save" class:dirty={sectionDirty} onclick={saveSection}>
 										<span class="material-icons">check</span> Save Section
 									</button>
@@ -464,8 +529,24 @@
 		{:else if activeTab === "intro"}
 			<div class="intro-tab">
 				<p class="intro-desc">This introduction is shown to officers when they are required to acknowledge the SOP. Use it to summarize key policies and expectations.</p>
-				<div class="editor-container" bind:this={introEditorEl}></div>
+				{#if markdownMode}
+					<textarea
+						class="markdown-editor"
+						placeholder={"# Introduction\n\nWrite Markdown here. Use ![alt text](https://image-url) for images."}
+						bind:value={markdownContent}
+						oninput={() => introDirty = true}
+					></textarea>
+				{:else}
+					<div class="editor-container" bind:this={introEditorEl}></div>
+				{/if}
 				<div class="editor-actions">
+					<button
+						class="btn-format"
+						onclick={() => markdownMode ? disableMarkdown("intro") : enableMarkdown(introEditorService, settings.introduction || "")}
+					>
+						<span class="material-icons">code</span>
+						{markdownMode ? "Use Rich Text" : "Use Markdown"}
+					</button>
 					<button class="btn-save" class:dirty={introDirty} onclick={saveIntro}>
 						<span class="material-icons">save</span> Save Introduction
 					</button>
@@ -902,10 +983,51 @@
 		height: 0;
 	}
 
+	.markdown-editor {
+		width: 100%;
+		min-height: 400px;
+		box-sizing: border-box;
+		padding: 16px;
+		resize: vertical;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.85);
+		font: 13px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+		outline: none;
+	}
+
+	.markdown-editor:focus {
+		border-color: rgba(var(--accent-rgb), 0.45);
+	}
+
 	.editor-actions {
 		display: flex;
 		gap: 8px;
 		flex-shrink: 0;
+	}
+
+	.btn-format {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 4px 10px;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 3px;
+		background: rgba(255, 255, 255, 0.04);
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 10px;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.btn-format:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.btn-format .material-icons {
+		font-size: 14px;
 	}
 
 	.btn-save, .btn-cancel {
