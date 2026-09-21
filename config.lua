@@ -1087,6 +1087,7 @@ Config.RateLimits = {
     createCharge   = { max = 15, windowMs = 20000 },
     createBulletin = { max = 10, windowMs = 20000 },
     sendMessage    = { max = 20, windowMs = 15000 },
+    searchCitizens = { max = 25, windowMs = 10000 },
 }
 
 -- Department banking Fines and impound fees were taken off citizens and then

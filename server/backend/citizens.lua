@@ -1,5 +1,12 @@
 local resourceName = tostring(GetCurrentResourceName())
 
+CreateThread(function()
+    Wait(2000)
+    if EnsureIndex then
+        EnsureIndex('mdt_profiles', 'idx_mdt_profiles_fullname', '`fullname`')
+    end
+end)
+
 local function buildInClause(values)
     local placeholders = {}
     for i = 1, #values do
@@ -226,6 +233,7 @@ end)
 lib.callback.register(resourceName .. ':server:searchCitizens', function(source, query)
     local src = source
     if not CheckAuth(src) then return {} end
+    if not RateLimitAction(src, 'searchCitizens') then return {} end
     local startTime = os.clock()
 
     local norm, searchTerm = NormalizeSearch(query)
@@ -239,7 +247,8 @@ lib.callback.register(resourceName .. ':server:searchCitizens', function(source,
         })
     end
 
-    -- Build a complex search query that searches across multiple fields and returns same data as getCitizens
+    -- Build optimized search query: check indexed columns (mp.fullname, p.citizenid) first
+    -- and omit expensive dynamic JSON string concatenations.
     local sqlQuery = [[
         SELECT DISTINCT
             mp.id, p.citizenid,
@@ -254,10 +263,10 @@ lib.callback.register(resourceName .. ':server:searchCitizens', function(source,
         FROM players AS p
         LEFT JOIN mdt_profiles AS mp ON p.citizenid = mp.citizenid COLLATE utf8mb4_general_ci
         WHERE 
+            mp.fullname LIKE ? OR
+            p.citizenid LIKE ? OR
             LOWER(JSON_UNQUOTE(JSON_EXTRACT(p.charinfo, '$.firstname'))) LIKE ? OR
             LOWER(JSON_UNQUOTE(JSON_EXTRACT(p.charinfo, '$.lastname'))) LIKE ? OR
-            LOWER(CONCAT(JSON_UNQUOTE(JSON_EXTRACT(p.charinfo, '$.firstname')), ' ', JSON_UNQUOTE(JSON_EXTRACT(p.charinfo, '$.lastname')))) LIKE ? OR
-            LOWER(p.citizenid) LIKE ? OR
             LOWER(JSON_UNQUOTE(JSON_EXTRACT(p.charinfo, '$.phone'))) LIKE ? OR
             LOWER(JSON_UNQUOTE(JSON_EXTRACT(p.job, '$.label'))) LIKE ? OR
             LOWER(JSON_UNQUOTE(JSON_EXTRACT(p.metadata, '$.fingerprint'))) LIKE ? OR
@@ -862,6 +871,12 @@ end)
 lib.callback.register(resourceName .. ':server:updateCitizenFingerprint', function(source, citizenid, fingerprint)
     local src = source
     if not CheckAuth(src) then return { success = false, message = 'Unauthorized' } end
+    if MDT.getJobType(src) ~= Config.PoliceJobType and not (IsCallerDoj and IsCallerDoj(src)) then
+        return { success = false, message = 'Unauthorized job' }
+    end
+    if not (CheckPermission(src, 'evidence_create') or CheckPermission(src, 'citizens_edit_licenses') or (MDT.isBoss and MDT.isBoss(src))) then
+        return { success = false, message = 'Insufficient permissions' }
+    end
 
     if not citizenid or citizenid == '' then
         return { success = false, message = 'Missing citizen id' }
@@ -871,6 +886,12 @@ lib.callback.register(resourceName .. ':server:updateCitizenFingerprint', functi
     -- clobber it (same rationale as updateCitizenLicense).
     local Player = MDT.getPlayerByIdentifier(citizenid)
     if Player and Player.Functions and Player.Functions.SetMetaData then
+        local currentFingerprint = Player.PlayerData and Player.PlayerData.metadata and Player.PlayerData.metadata.fingerprint
+        if currentFingerprint and currentFingerprint ~= '' and currentFingerprint ~= fingerprint then
+            if not (MDT.isBoss and MDT.isBoss(src)) then
+                return { success = false, message = 'Fingerprint is already registered. Supervisor authorization required to overwrite.' }
+            end
+        end
         Player.Functions.SetMetaData('fingerprint', fingerprint or '')
         persistLiveMetadata(Player, citizenid)
         if MDT.auditLog then
@@ -886,6 +907,13 @@ lib.callback.register(resourceName .. ':server:updateCitizenFingerprint', functi
     end
 
     local metadata = row.metadata and json.decode(row.metadata) or {}
+    local currentFingerprint = metadata.fingerprint
+    if currentFingerprint and currentFingerprint ~= '' and currentFingerprint ~= fingerprint then
+        if not (MDT.isBoss and MDT.isBoss(src)) then
+            return { success = false, message = 'Fingerprint is already registered. Supervisor authorization required to overwrite.' }
+        end
+    end
+
     metadata.fingerprint = fingerprint or ''
     MySQL.update.await('UPDATE players SET metadata = ? WHERE citizenid = ?', { json.encode(metadata), citizenid })
 
@@ -900,6 +928,12 @@ end)
 lib.callback.register(resourceName .. ':server:updateCitizenDNA', function(source, citizenid, dna)
     local src = source
     if not CheckAuth(src) then return { success = false, message = 'Unauthorized' } end
+    if MDT.getJobType(src) ~= Config.PoliceJobType and not (IsCallerDoj and IsCallerDoj(src)) then
+        return { success = false, message = 'Unauthorized job' }
+    end
+    if not (CheckPermission(src, 'evidence_create') or CheckPermission(src, 'citizens_edit_licenses') or (MDT.isBoss and MDT.isBoss(src))) then
+        return { success = false, message = 'Insufficient permissions' }
+    end
 
     if not citizenid or citizenid == '' then
         return { success = false, message = 'Missing citizen id' }
@@ -921,6 +955,7 @@ lib.callback.register(resourceName .. ':server:updateCitizenDNA', function(sourc
     end
 
     local metadata = row.metadata and json.decode(row.metadata) or {}
+
     metadata.dna = dna or ''
     MySQL.update.await('UPDATE players SET metadata = ? WHERE citizenid = ?', { json.encode(metadata), citizenid })
 
