@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import { fetchNui } from "../utils/fetchNui";
 	import { NUI_EVENTS } from "../constants/nuiEvents";
+	import { sanitizeHtml } from "../utils/sanitizeHtml";
 	import type { AuthService } from "../services/authService.svelte";
 
 	interface SOPSection {
@@ -310,7 +311,7 @@
 						<span class="material-icons doc-icon">flag</span>
 						<h3>Mission Statement</h3>
 					</div>
-					<div class="doc-body prose">{@html sopSettings.mission_statement}</div>
+					<div class="doc-body prose">{@html sanitizeHtml(sopSettings.mission_statement)}</div>
 				</div>
 			{/if}
 
@@ -320,7 +321,7 @@
 						<span class="material-icons doc-icon">info</span>
 						<h3>Introduction</h3>
 					</div>
-					<div class="doc-body prose">{@html sopSettings.introduction}</div>
+					<div class="doc-body prose">{@html sanitizeHtml(sopSettings.introduction)}</div>
 				</div>
 			{/if}
 		{:else if !selectedCategory}
@@ -366,7 +367,7 @@
 							<span class="section-number">{i + 1}</span>
 							<h3 class="section-title">{@html highlightText(section.title)}</h3>
 						</div>
-						<div class="section-content prose">{@html highlight(section.content)}</div>
+						<div class="section-content prose">{@html highlight(sanitizeHtml(section.content))}</div>
 					</div>
 				{/each}
 			</div>

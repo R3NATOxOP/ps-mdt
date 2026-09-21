@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fetchNui } from "../utils/fetchNui";
 	import { NUI_EVENTS } from "../constants/nuiEvents";
+	import { sanitizeHtml } from "../utils/sanitizeHtml";
 	import { getAppInfo } from "../constants";
 	import type { AuthService } from "../services/authService.svelte";
 
@@ -62,7 +63,7 @@
 					</div>
 					<div class="section-card">
 						<div class="section-content">
-							{@html missionStatement}
+							{@html sanitizeHtml(missionStatement)}
 						</div>
 					</div>
 				</div>
@@ -76,7 +77,7 @@
 					</div>
 					<div class="section-card intro-card">
 						<div class="section-content">
-							{@html introduction}
+							{@html sanitizeHtml(introduction)}
 						</div>
 					</div>
 				</div>
