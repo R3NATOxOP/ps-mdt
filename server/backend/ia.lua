@@ -209,6 +209,9 @@ lib.callback.register(resourceName .. ':server:getIAComplaints', function(source
         MDT.debug('getIAComplaints: CheckAuth failed for source ' .. tostring(src))
         return { complaints = {}, hasMore = false }
     end
+    if not CheckPermission(src, 'ia_view') then
+        return { complaints = {}, hasMore = false }
+    end
 
     local page = tonumber(pageNum) or 1
     local limit = Config.Pagination and Config.Pagination.Cases or 20
@@ -268,6 +271,7 @@ end)
 lib.callback.register(resourceName .. ':server:getIAComplaint', function(source, data)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'ia_view') then return { success = false, error = 'Insufficient permissions' } end
 
     local complaintId = tonumber(data)
     if not complaintId then
@@ -303,6 +307,7 @@ end)
 lib.callback.register(resourceName .. ':server:getIAHistoryForOfficer', function(source, officerName, officerCid)
     local src = source
     if not CheckAuth(src) then return {} end
+    if not CheckPermission(src, 'ia_view') then return {} end
 
     if (not officerName or officerName == '') and (not officerCid or officerCid == '') then
         return {}
@@ -333,6 +338,7 @@ end)
 lib.callback.register(resourceName .. ':server:updateIAComplaintInfo', function(source, complaintId, updates)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'ia_manage') then return { success = false, error = 'Insufficient permissions' } end
 
     complaintId = tonumber(complaintId)
     updates = updates or {}
@@ -384,6 +390,7 @@ end)
 lib.callback.register(resourceName .. ':server:updateIAStatus', function(source, complaintId, status)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'ia_manage') then return { success = false, error = 'Insufficient permissions' } end
 
     complaintId = tonumber(complaintId)
     if not complaintId or not status then
@@ -405,6 +412,7 @@ end)
 lib.callback.register(resourceName .. ':server:assignIAComplaint', function(source, complaintId, assigneeCitizenId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'ia_manage') then return { success = false, error = 'Insufficient permissions' } end
 
     complaintId = tonumber(complaintId)
     if not complaintId or not assigneeCitizenId then
@@ -433,6 +441,7 @@ end)
 lib.callback.register(resourceName .. ':server:addIANote', function(source, complaintId, content)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'ia_manage') then return { success = false, error = 'Insufficient permissions' } end
 
     complaintId = tonumber(complaintId)
     if not complaintId or not content or content == '' then
@@ -455,6 +464,7 @@ end)
 lib.callback.register(resourceName .. ':server:deleteIANote', function(source, noteId, complaintId)
     local src = source
     if not CheckAuth(src) then return { success = false, error = 'Unauthorized' } end
+    if not CheckPermission(src, 'ia_manage') then return { success = false, error = 'Insufficient permissions' } end
 
     noteId = tonumber(noteId)
     complaintId = tonumber(complaintId)
